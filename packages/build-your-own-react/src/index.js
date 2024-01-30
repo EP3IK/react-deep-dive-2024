@@ -20,20 +20,6 @@ function createElement(type, props, ...children) {
   };
 }
 
-function createDom(fiber) {
-  const dom =
-    fiber.type === 'TEXT_ELEMENT'
-      ? document.createTextNode('')
-      : document.createElement(fiber.type);
-
-  const isProperty = (key) => key !== 'children';
-  Object.keys(fiber.props)
-    .filter(isProperty)
-    .forEach((name) => (dom[name] = fiber.props[name]));
-
-  return dom;
-}
-
 let nextUnitOfWork = null;
 let currentRoot = null;
 let wipRoot = null;
@@ -76,6 +62,17 @@ function updateDom(dom, prevProps, nextProps) {
       const eventType = name.toLowerCase().substring(2);
       dom.addEventListener(eventType, nextProps[name]);
     });
+}
+
+function createDom(fiber) {
+  const dom =
+    fiber.type === 'TEXT_ELEMENT'
+      ? document.createTextNode('')
+      : document.createElement(fiber.type);
+
+  updateDom(dom, {}, fiber.props);
+
+  return dom;
 }
 
 function commitRoot() {
@@ -129,10 +126,10 @@ function render(element, container) {
 
 function reconcileChildren(wipFiber, elements) {
   let index = 0;
-  let oldFiber = wipFiber.alternate?.child ?? null;
+  let oldFiber = wipFiber.alternate?.child;
   let prevSibling = null;
 
-  while (index < elements.length || oldFiber !== null) {
+  while (index < elements.length || oldFiber) {
     const element = elements[index];
     let newFiber = null;
 
@@ -188,7 +185,41 @@ function updateHostComponent(fiber) {
   reconcileChildren(fiber, fiber.props.children);
 }
 
+let wipFiber = null;
+let hookIndex = null;
+
+function useState(initial) {
+  const oldHook = wipFiber.alternate?.hooks?.[hookIndex];
+  const hook = {
+    state: oldHook?.state ?? initial,
+    queue: [],
+  };
+
+  const actions = oldHook?.queue ?? [];
+  actions.forEach((action) => {
+    hook.state = action(hook.state);
+  });
+
+  const setState = (action) => {
+    hook.queue.push(action);
+    wipRoot = {
+      dom: currentRoot.dom,
+      props: currentRoot.props,
+      alternate: currentRoot,
+    };
+    nextUnitOfWork = wipRoot;
+    deletions = [];
+  };
+
+  wipFiber.hooks.push(hook);
+  hookIndex++;
+  return [hook.state, setState];
+}
+
 function updateFunctionComponent(fiber) {
+  wipFiber = fiber;
+  hookIndex = 0;
+  wipFiber.hooks = [];
   const children = [fiber.type(fiber.props)];
   reconcileChildren(fiber, children);
 }
@@ -229,12 +260,13 @@ function workLoop(deadline) {
 
 requestIdleCallback(workLoop);
 
-const Didact = { createElement, render };
+const Didact = { createElement, render, useState };
 
 /** @jsx Didact.createElement */
-function App(props) {
-  return <h1>Hi {props.name}</h1>;
+function Counter() {
+  const [state, setState] = Didact.useState(1);
+  return <h1 onClick={() => setState((c) => c + 1)}>Count: {state}</h1>;
 }
-const element = <App name="foo" />;
+const element = <Counter />;
 const container = document.getElementById('root');
 Didact.render(element, container);
