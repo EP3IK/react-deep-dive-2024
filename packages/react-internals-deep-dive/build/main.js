@@ -23472,18 +23472,52 @@ var require_jsx_dev_runtime = __commonJS((exports, module) => {
 });
 
 // src/main.tsx
-var import_react = __toESM(require_react(), 1);
 var client = __toESM(require_client(), 1);
+
+// src/App.tsx
+var import_react = __toESM(require_react(), 1);
 var jsx_dev_runtime = __toESM(require_jsx_dev_runtime(), 1);
-var App = function() {
-  const [count, setCount] = import_react.useState(1);
-  debugger;
-  import_react.useEffect(() => {
-    debugger;
-    setCount((count2) => count2 + 1);
-  }, []);
-  return jsx_dev_runtime.jsxDEV("button", {
-    children: count
+var Link = function() {
+  return jsx_dev_runtime.jsxDEV("a", {
+    href: "https://jser.dev",
+    children: "jser.dev"
   }, undefined, false, undefined, this);
 };
-client.default.createRoot(document.getElementById("root")).render(jsx_dev_runtime.jsxDEV(App, {}, undefined, false, undefined, this));
+var Button = function() {
+  return jsx_dev_runtime.jsxDEV("button", {
+    children: "click me -"
+  }, undefined, false, undefined, this);
+};
+var Component = function() {
+  const [count, setCount] = import_react.useState(0);
+  import_react.useEffect(() => {
+    setTimeout(() => {
+      setCount((count2) => count2 + 1);
+    }, 2000);
+  });
+  return jsx_dev_runtime.jsxDEV("div", {
+    children: [
+      jsx_dev_runtime.jsxDEV(Button, {}, undefined, false, undefined, this),
+      " (",
+      count % 2 === 0 ? jsx_dev_runtime.jsxDEV("span", {
+        children: "even"
+      }, undefined, false, undefined, this) : jsx_dev_runtime.jsxDEV("b", {
+        children: "odd"
+      }, undefined, false, undefined, this),
+      ")"
+    ]
+  }, undefined, true, undefined, this);
+};
+function App() {
+  return jsx_dev_runtime.jsxDEV("div", {
+    children: [
+      jsx_dev_runtime.jsxDEV(Link, {}, undefined, false, undefined, this),
+      jsx_dev_runtime.jsxDEV("br", {}, undefined, false, undefined, this),
+      jsx_dev_runtime.jsxDEV(Component, {}, undefined, false, undefined, this)
+    ]
+  }, undefined, true, undefined, this);
+}
+
+// src/main.tsx
+var jsx_dev_runtime2 = __toESM(require_jsx_dev_runtime(), 1);
+client.default.createRoot(document.getElementById("root")).render(jsx_dev_runtime2.jsxDEV(App, {}, undefined, false, undefined, this));
