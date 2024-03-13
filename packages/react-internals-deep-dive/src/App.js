@@ -1,64 +1,36 @@
 /* global React, ReactDOM */
 /* eslint-disable react/prop-types */
 
-// function Child({ count }) {
-//   console.log(7);
-//   React.useEffect(() => {
-//     console.log(5);
-//     return () => {
-//       console.log(6);
-//     };
-//   }, [count]);
+const Context = React.createContext("123");
+const Context2 = React.createContext("456");
 
-//   return null;
-// }
+function Component1() {
+  return <Component2 />;
+}
 
-// function App() {
-//   const [count, setCount] = React.useState(1);
-//   console.log(1);
-//   debugger;
-//   React.useEffect(() => {
-//     console.log(2);
-//     return () => {
-//       console.log(3);
-//     };
-//   }, [count]);
+function Component2() {
+  const value = React.useContext(Context)
+  const value2 = React.useContext(Context2)
 
-//   React.useEffect(() => {
-//     console.log(4);
-//     setCount((count) => count + 1);
-//   }, []);
-//   return <Child count={count} />;
-// }
+  return <div>{value} + {value2}</div>;
 
-const App = () => {
-  const [counter, setCounter] = React.useState(0);
+  // return <Context.Consumer>
+  //   {(value) => value}
+  // </Context.Consumer>;
+}
 
-  React.useEffect(function firstEffectSetup() {
-    console.log('first setup');
-  });
-
-  React.useEffect(
-    function secondEffectFunction() {
-      console.log('second setup', { counter });
-
-      return function secondEffectCleanup() {
-        console.log('second cleanup');
-      };
-    },
-    [counter],
-  );
+function App() {
+  const [jser, setJser] = React.useState("JSer")
 
   return (
-    <button
-      onClick={() => {
-        setCounter(counter + 1);
-      }}
-    >
-      {counter}
-    </button>
+    <Context2.Provider value="JSer2">
+      <Context.Provider value={jser}>
+        <Component1 />
+      </Context.Provider>
+      <button onClick={() => setJser('JSer3')}>setJser</button>
+    </Context2.Provider>
   );
-};
+}
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(<App />);
